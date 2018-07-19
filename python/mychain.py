@@ -57,7 +57,11 @@ class Block:
         in a form where we can validate a transaction in an efficient manner.
         """
         curr_hash = ""
-        #TODO
+        #TODO Merkle-tree implementation
+        for trn in self.transactions :
+            new_hash = hash_message(jsonpickle.encode(trn))
+            curr_hash = hash_message(curr_hash + new_hash)
+
         return curr_hash
 
     def add_transaction(self, transaction):
@@ -74,12 +78,12 @@ class Block:
         """
         self.payload_hash = self._hash_payload()
         blockheader_data = {
-            'payload_hash': "",
-            'timestamp': "",
-            'prev_hash': "",
-            'total_transactions': ""
+            'payload_hash': self.payload_hash,
+            'timestamp': self.timestamp,
+            'prev_hash': self.prev_hash,
+            'total_transactions': self.transaction_count
         }
-        block_rep = ""
+        block_rep = jsonpickle.encode(blockheader_data)
         return hash_message(block_rep)
 
     def finalize(self):
@@ -89,12 +93,14 @@ class Block:
             raise ValueError("Block already final")
 
     def validate(self):
-        return false
+
+        return self.hash == self._hash_block()
 
 
 def hash_message(data):
     #TODO  use SHA256 and return HEX digest
-    return "HASH"
+    value = hashlib.sha256(data).hexdigest()
+    return value
 
 
 def savechain(blockchain, datafile):
@@ -108,7 +114,19 @@ def loadchain(datafile):
 
 
 def validatechain(blockchain):
-    return False
+    #size = len(blockchain)
+    valid = False
+    for idx, val in enumerate(blockchain):
+        
+        if(idx == 0):
+            valid = val.validate()
+        else:
+            valid = (blockchain[idx].prev_hash == blockchain[idx-1].hash) and blockchain[idx].validate()
+
+        if(not valid):
+            break
+    
+    return valid
 
 
 def main():

@@ -91,13 +91,14 @@ class BlockChainTest(unittest.TestCase):
         newblock.add_transaction(newtx)
         newblock.finalize()
         self.blockchain.append(newblock)
-        thirdblock = Block(blockchain=self.blockchain)
+        thirdblock = Block()
         anothertx = Transaction("Jeeva", "Vinoth", 2)
         thirdblock.add_transaction(anothertx)
         thirdblock.finalize()
         #self.assertTrue(validatechain(self.blockchain))
         newblock.add_transaction(anothertx)
-        self.blockchain[1] = newblock
+        self.blockchain[1] = thirdblock
+        self.assertNotEquals(self.blockchain[0].hash, self.blockchain[1].prev_hash)
         self.assertFalse(validatechain(self.blockchain))
 
 
